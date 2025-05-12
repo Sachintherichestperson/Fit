@@ -95,7 +95,7 @@ const ChallengesPage = () => {
   const fetchChallengeData = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://192.168.105.177:3000/ShortChallenge');
+      const response = await fetch('http://192.168.244.177:3000/ShortChallenge');
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
@@ -168,7 +168,7 @@ const ChallengesPage = () => {
 
 
   const UserActiveChallenge = async () => {
-    const request = await fetch('http://192.168.105.177:3000/UserActiveShortChallenge');
+    const request = await fetch('http://192.168.244.177:3000/UserActiveShortChallenge');
     const data = await request.json();
     setActiveChallenge(data.ShortActiveChallenge);
     setProgressBar(data.progress);

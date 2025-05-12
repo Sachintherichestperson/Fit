@@ -19,7 +19,7 @@ const RegisterScreen = ({ navigation }) => {
   const handleSubmit = async () => {
     try {
       // Send the POST request to register the user
-      const response = await fetch('http://192.168.105.177:3000/Register', {
+      const response = await fetch('http://192.168.244.177:3000/Register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),  // Assuming form is your form data

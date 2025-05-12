@@ -34,7 +34,7 @@ const ShopPage = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('http://192.168.105.177:3000/Products', {
+      const response = await fetch('http://192.168.244.177:3000/Products', {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',

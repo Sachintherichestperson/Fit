@@ -236,7 +236,7 @@ const CreateChallengeScreen = () => {
     setError('');
     if (!validateForm()) {return;}
 
-    const response = await fetch('http://192.168.105.177:3000/personalized-Challenge', {
+    const response = await fetch('http://192.168.244.177:3000/personalized-Challenge', {
       method: 'Post',
       headers: {
         'Content-Type': 'application/json',

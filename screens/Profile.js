@@ -18,7 +18,7 @@ const ProfilePage = ({ navigation }) => {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://192.168.105.177:3000/Profile');
+      const response = await fetch('http://192.168.244.177:3000/Profile');
       const data = await response.json();
 
       if(response.ok) {

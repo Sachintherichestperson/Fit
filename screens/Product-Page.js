@@ -46,7 +46,7 @@ const ProductPage = () => {
 
  const CartBtn = async () => {
   try {
-    const response = await fetch(`http://192.168.105.177:3000/Cart/${product.id}`, {
+    const response = await fetch(`http://192.168.244.177:3000/Cart/${product.id}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ const ProductPage = () => {
 
 
   const fetchProducts = async () => {
-    const response = await fetch('http://192.168.105.177:3000/Products');
+    const response = await fetch('http://192.168.244.177:3000/Products');
     const data = await response.json();
      const filteredProducts = data.Products.filter(
       prod => prod._id !== product.id 

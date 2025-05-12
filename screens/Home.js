@@ -28,7 +28,7 @@ const FitStreakApp = () => {
 
   const fetchChallengeStatus = async () => {
     try {
-      const response = await fetch('http://192.168.105.177:3000/');
+      const response = await fetch('http://192.168.244.177:3000/');
       const data = await response.json();
       setChallengeStatus(data);
     } catch (error) {

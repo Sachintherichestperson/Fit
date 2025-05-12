@@ -44,7 +44,7 @@ const FitStreakDashboard = ({ navigation }) => {
 
   const fetchChallengeStatus = async () => {
     try {
-      const response = await fetch('http://192.168.105.177:3000/Stats');
+      const response = await fetch('http://192.168.244.177:3000/Stats');
       const data = await response.json();
       setuserStats(data);
     } catch (error) {

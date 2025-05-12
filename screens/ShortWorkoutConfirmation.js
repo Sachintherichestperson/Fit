@@ -51,7 +51,7 @@ const CheckInPage = () => {
 
   const FetchPeriod = async () => {
     try{
-      const response = await fetch(`http://192.168.105.177:3000/ShortActiveChallenge/${activeChallenge.id}`);
+      const response = await fetch(`http://192.168.244.177:3000/ShortActiveChallenge/${activeChallenge.id}`);
       const data = await response.json();
       setDaysCompleted(data.daysInProgress);
       setBarProgress(data.progress);
@@ -74,7 +74,7 @@ const CheckInPage = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const checkUserCheckedInStatus = async () => {
     try {
-      const response = await fetch(`http://192.168.105.177:3000/CheckInDate/Check/${activeChallenge.id}`);
+      const response = await fetch(`http://192.168.244.177:3000/CheckInDate/Check/${activeChallenge.id}`);
       const data = await response.json();
       
       // Only set isCheckedIn to true if it's not rejected
@@ -175,7 +175,7 @@ const CheckInPage = () => {
         });
       }
 
-      const response = await fetch(`http://192.168.105.177:3000/UploadCheckIn/Proof/${activeChallenge.id}`, {
+      const response = await fetch(`http://192.168.244.177:3000/UploadCheckIn/Proof/${activeChallenge.id}`, {
         method: 'POST',
         body: formData,
       });
@@ -224,7 +224,7 @@ const CheckInPage = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`http://192.168.105.177:3000/CheckIn/${activeChallenge.id}`, {
+      const response = await fetch(`http://192.168.244.177:3000/CheckIn/${activeChallenge.id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -25,7 +25,7 @@ const CartPage = () => {
   const CartData = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://192.168.105.177:3000/Cart/Data');
+      const response = await fetch('http://192.168.244.177:3000/Cart/Data');
       const data = await response.json();
       
       const mappedCartItems = data.Cart.map(item => ({
@@ -74,7 +74,7 @@ const CartPage = () => {
   const removeItem = async (id) => {
     try {
       setLoading(true);
-      const response = await fetch(`http://192.168.105.177:3000/Cart/Remove-${id}`);
+      const response = await fetch(`http://192.168.244.177:3000/Cart/Remove-${id}`);
       if(response.ok){
         const removedItem = cartItems.find(item => item.id === id);
         if (removedItem.pointsUsed > 0) {

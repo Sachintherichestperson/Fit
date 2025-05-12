@@ -36,7 +36,7 @@ const StackNavigator = () => {
         return;
       }
 
-      const response = await fetch('http://192.168.105.177:3000/validate-token', {
+      const response = await fetch('http://192.168.244.177:3000/validate-token', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

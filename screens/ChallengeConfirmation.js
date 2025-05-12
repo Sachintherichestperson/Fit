@@ -20,7 +20,7 @@ const ChallengeConfirmationScreen = ({ navigation }) => {
   const [ SelectedChallenge, SetSelectedChallenge ] = React.useState({});
   const FetchData = async () => {
     try {
-      const response = await fetch('http://192.168.105.177:3000/challenge-confirmation-page');
+      const response = await fetch('http://192.168.244.177:3000/challenge-confirmation-page');
       const data = await response.json();
       SetSelectedChallenge(data);
     } catch (error) {

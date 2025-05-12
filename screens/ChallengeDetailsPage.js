@@ -43,7 +43,7 @@ const ChallengeDetails = () => {
   ];
 
   const handleJoin = async () => {
-    const response = await fetch('http://192.168.105.177:3000/ShortChallenge', {
+    const response = await fetch('http://192.168.244.177:3000/ShortChallenge', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ const ChallengeDetails = () => {
 
   const IsUserIn = async () => {
    try{
-    const response = await fetch(`http://192.168.105.177:3000/UserShortChallenge/${challenge.id}`);
+    const response = await fetch(`http://192.168.244.177:3000/UserShortChallenge/${challenge.id}`);
     const data = await response.json();
     if(response.ok){
       setIsJoined(data.isInChallenge);

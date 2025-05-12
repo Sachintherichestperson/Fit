@@ -80,7 +80,7 @@ const PaymentScreen = ({ route }) => {
     //   theme: { color: '#FF2E63' },
     // };
     try {
-      const response = await fetch('http://192.168.105.177:3000/Payment-Challenge-Confirmed', {
+      const response = await fetch('http://192.168.244.177:3000/Payment-Challenge-Confirmed', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

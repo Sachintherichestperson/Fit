@@ -21,7 +21,7 @@ const CompanyChallenges = ({ navigation }) => {
 
   const fetchChallengeStatus = async () => {
     try {
-      const response = await fetch('http://192.168.105.177:3000/Automated-Challenge');
+      const response = await fetch('http://192.168.244.177:3000/Automated-Challenge');
       const data = await response.json();
       setAssignedchallenge(data);
     } catch (error) {
@@ -69,7 +69,7 @@ const CompanyChallenges = ({ navigation }) => {
 
       setSelectedChallenge(challenge.id);
 
-      const response = await fetch('http://192.168.105.177:3000/Challenge-Confirmation', {
+      const response = await fetch('http://192.168.244.177:3000/Challenge-Confirmation', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

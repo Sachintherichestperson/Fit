@@ -20,7 +20,7 @@ const SkipPage = ({ route }) => {
   const [challengeDetails, setChallengeDetails] = useState({});
 
   const FetchPaymentinfo = async () => {
-    const response = await fetch('http://192.168.105.177:3000/Skip-Workout-Page');
+    const response = await fetch('http://192.168.244.177:3000/Skip-Workout-Page');
     const data = await response.json();
     setChallengeDetails(data);
   }
@@ -93,7 +93,7 @@ const SkipPage = ({ route }) => {
     //   theme: { color: '#FF2E63' },
     // };
     try {
-      const response = await fetch('http://192.168.105.177:3000/Skip-Workout-Page', {
+      const response = await fetch('http://192.168.244.177:3000/Skip-Workout-Page', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
