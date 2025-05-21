@@ -1,614 +1,836 @@
-/* eslint-disable react-native/no-inline-styles */
-import React, {useRef, useState, useEffect} from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated, Easing } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
-import { useNavigation } from '@react-navigation/native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  Dimensions,
+  FlatList,
+} from 'react-native';
+import { LineChart } from 'react-native-chart-kit';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
-const FitStreakApp = () => {
-  // Animation values
-  const pulseAnim = useRef(new Animated.Value(0)).current;
-  const floatingAnim = useRef(new Animated.Value(0)).current;
-  const blinkAnim = useRef(new Animated.Value(0)).current;
-  const navigation = useNavigation();
+const FitQuestApp = () => {
+  const [activeTab, setActiveTab] = useState('steps');
+  const [activeMetric, setActiveMetric] = useState('steps');
+  const [showAd, setShowAd] = useState(true);
 
-  const [challengeStatus, setChallengeStatus] = useState({
-    ChallengeExist: false,
-    AssignedPresentChallenge: false,
-    AssignedChallenge: false,
-    SelfChallenge: false,
-    skipornot: false,
-    SkipEndDate: null,
-    StartDate: null,      // Add these
-    EndDate: null 
-  });
-  const [remainingTime, setRemainingTime] = useState('');
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-  const fetchChallengeStatus = async () => {
-    try {
-      const response = await fetch('http://192.168.244.177:3000/');
-      const data = await response.json();
-      setChallengeStatus(data);
-    } catch (error) {
-      console.error('Error fetching challenge status:', error);
+  const chartData = {
+    steps: [5200, 7800, 6500, 8100, 9300, 10500, 8700],
+    calories: [800, 1200, 1000, 1400, 1600, 1800, 1500],
+    bpm: [68, 72, 70, 75, 71, 73, 69],
+  };
+
+  const trendData = {
+    steps: {
+      trend: 'up',
+      text: 'You improved by 12% this week!',
+    },
+    calories: {
+      trend: 'up',
+      text: 'You burned 18% more calories!',
+    },
+    bpm: {
+      trend: 'neutral',
+      text: 'Your heart rate is stable',
+    },
+  };
+
+  const challenges = [
+    { id: '1', title: '30-Day Plank', description: 'Win Elite Membership', progress: '12/30', color: ['#8A2BE2', '#FF00FF'] },
+    { id: '2', title: '100 Pushups', description: 'Earn 500 points', progress: '63/100', color: ['#FF8C00', '#FFD700'] },
+    { id: '3', title: '5K Steps Daily', description: 'Get FitQuest merch', progress: '3/7', color: ['#00CED1', '#00FA9A'] },
+    { id: '4', title: 'Hydration Week', description: 'Discount on gear', progress: '4/7', color: ['#FF1493', '#FF6347'] },
+  ];
+
+  const exercises = [
+    { id: '1', name: 'Push-ups', sets: '3x12', icon: 'hand-paper-o' },
+    { id: '2', name: 'Squats', sets: '3x15', icon: 'user-o' },
+    { id: '3', name: 'Plank', sets: '3x30s', icon: 'clock-o' },
+    { id: '4', name: 'Lunges', sets: '3x10', icon: 'arrow-up' },
+  ];
+
+  const blogs = [
+    {
+      id: '1',
+      title: '5 Essential Exercises for Beginners',
+      excerpt: 'Start your fitness journey with these fundamental moves that build strength and endurance...',
+      category: 'Training',
+      author: 'By FitQuest Team',
+      readTime: '5 min read',
+      image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+    },
+    {
+      id: '2',
+      title: 'Pre-Workout Nutrition: What to Eat',
+      excerpt: 'Optimize your performance with these scientifically-backed pre-workout meal ideas...',
+      category: 'Nutrition',
+      author: 'By Dr. Sarah Chen',
+      readTime: '7 min read',
+      image: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+    },
+  ];
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setActiveMetric(tab);
+    updateTrendIndicator(tab);
+  };
+
+  const updateTrendIndicator = (tab) => {
+    // This would update the UI based on the trend data
+    // Implemented directly in the render method
+  };
+
+  const renderMetricIcon = (metric) => {
+    switch(metric) {
+      case 'steps':
+        return <Icon name="walking" size={12} color="#00A8FF" />;
+      case 'calories':
+        return <Icon name="fire" size={12} color="#00A8FF" />;
+      case 'bpm':
+        return <Icon name="heartbeat" size={12} color="#00A8FF" />;
+      default:
+        return null;
     }
   };
 
-  const updateRemainingTime = (skipEndDate) => {
-    if (!skipEndDate) {
-      setRemainingTime('Invalid Date');
-      return;
-    }
+  const renderTrendIcon = () => {
+    const trend = trendData[activeTab].trend;
 
-    const skipEndTimestamp = new Date(skipEndDate).getTime();
-    const currentTime = new Date().getTime();
-    const timeDiff = skipEndTimestamp - currentTime;
-
-    if (timeDiff <= 0) {
-      setRemainingTime("Time's up!");
-      return;
-    }
-
-    const hours = Math.floor(timeDiff / (1000 * 60 * 60));
-    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
-
-    setRemainingTime(`${hours}h ${minutes}m ${seconds}s left`);
-  };
-
-  useEffect(() => {
-    fetchChallengeStatus();
-
-    // Set up interval for countdown
-    const timer = setInterval(() => {
-      if (challengeStatus.skipornot && challengeStatus.SkipEndDate) {
-        updateRemainingTime(challengeStatus.SkipEndDate);
-      }
-    }, 1000);
-
-    // Clean up interval on component unmount
-    return () => clearInterval(timer);
-  }, [challengeStatus.skipornot, challengeStatus.SkipEndDate]);
-
-
-  const handleChallengeAction = () => {
-    if(challengeStatus.skipornot){
-      return;
-    }else if (challengeStatus.ChallengeExist) {
-      navigation.navigate('Skip-Page');
-    } else if (challengeStatus.AssignedPresentChallenge) {
-      navigation.navigate('ChallengeConfirmation');
-    } else if (challengeStatus.AssignedChallenge) {
-      navigation.navigate('Assigned');
-    } else if (challengeStatus.SelfChallenge) {
-      navigation.navigate('Assigned');
+    if (trend === 'up') {
+      return <Icon name="arrow-up" size={12} color="#00FF9D" style={styles.trendIcon} />;
+    } else if (trend === 'down') {
+      return <Icon name="arrow-down" size={12} color="#FF6B6B" style={styles.trendIcon} />;
     } else {
-      navigation.navigate('Challenges');
+      return <Icon name="equals" size={12} color="#aaa" style={styles.trendIcon} />;
     }
   };
-  // eslint-disable-next-line react/no-unstable-nested-components
-  const SkipButton = () => {
-    if(challengeStatus.skipornot){
-      return (
-        <TouchableOpacity style={styles.penaltyButton}>
-            <MaterialCommunityIcons name="qrcode-scan" size={18} color="#FF2E63" />
-            <Text style={styles.penaltyButtonText}>Workout is Skipped</Text>
-          </TouchableOpacity>
-      );
-    }else{
-      return (
-      <TouchableOpacity style={styles.penaltyButton}>
-            <MaterialCommunityIcons name="qrcode-scan" size={18} color="#FF2E63" />
-            <Text style={styles.penaltyButtonText}>Click To Start</Text>
-          </TouchableOpacity>
-  );
-  }
-};
-
-// eslint-disable-next-line react/no-unstable-nested-components
-const SkipChallenge = () => {
-  if(challengeStatus.skipornot){
-    return (
-      <TouchableOpacity style={styles.penaltyButton}>
-          <MaterialCommunityIcons name="qrcode-scan" size={18} color="#FF2E63" />
-          <Text style={styles.penaltyButtonText}>Workout is Skipped</Text>
-        </TouchableOpacity>
-    );
-  }else{
-    return (
-    <TouchableOpacity style={styles.penaltyButton} onPress={() => navigation.navigate('SubmitProof')}>
-          <Text style={styles.penaltyButtonText}>Submit Proof</Text>
-        </TouchableOpacity>
-);
-}
-};
-
-  const getButtonContent = () => {
-  if(challengeStatus.skipornot){
-    return (
-        <>
-          <Ionicons name="warning-outline" size={20} color="#FF2E63" />
-          <Text style={styles.emergencyButtonText}>Workout Skiped. {remainingTime}</Text>
-        </>
-    );
-  }else if (challengeStatus.ChallengeExist) {
-      return (
-        <>
-          <Ionicons name="warning-outline" size={20} color="#FF2E63" />
-          <Text style={styles.emergencyButtonText}>Want To Skip Today? PAY ₹50 TO SKIP</Text>
-        </>
-      );
-    } else if (challengeStatus.AssignedPresentChallenge) {
-      return (
-        <>
-          <Ionicons name="flag-outline" size={20} color="#FF2E63" />
-          <Text style={styles.emergencyButtonText}>CLEAR THE PAYMENT</Text>
-        </>
-      );
-    } else if (challengeStatus.AssignedChallenge) {
-      return (
-        <>
-          <Ionicons name="flag-outline" size={20} color="#FF2E63" />
-          <Text style={styles.emergencyButtonText}>SELECT THE ASSIGNED CHALLENGES</Text>
-        </>
-      );
-    } else if (challengeStatus.SelfChallenge) {
-      return (
-        <>
-          <Ionicons name="checkmark-circle-outline" size={20} color="#4CAF50" />
-          <Text style={styles.emergencyButtonText}>YOUR SELF CHALLENGE IS ACTIVE</Text>
-        </>
-      );
-    } else {
-      return (
-        <>
-          <Ionicons name="flag-outline" size={20} color="#FF2E63" />
-          <Text style={styles.emergencyButtonText}>SET THE CHALLENGE</Text>
-        </>
-      );
-    }
-  };
-
-  useEffect(() => {
-    fetchChallengeStatus();
-
-    // Pulse animation
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 1000,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: false,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 0,
-          duration: 1000,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: false,
-        }),
-      ])
-    ).start();
-
-    // Floating animation
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(floatingAnim, {
-          toValue: 1,
-          duration: 1500,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-        Animated.timing(floatingAnim, {
-          toValue: 0,
-          duration: 1500,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-
-    // Blink animation
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(blinkAnim, {
-          toValue: 1,
-          duration: 750,
-          useNativeDriver: false,
-        }),
-        Animated.timing(blinkAnim, {
-          toValue: 0,
-          duration: 750,
-          useNativeDriver: false,
-        }),
-      ])
-    ).start();
-  }, [blinkAnim, floatingAnim, pulseAnim]);
-
-  const pulseShadow = pulseAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [5, 15],
-  });
-
-  const floatingTranslation = floatingAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, -10],
-  });
-
-  const blinkOpacity = blinkAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [1, 0.7],
-  });
-
-const calculateProgress = () => {
-  if (!challengeStatus.StartDate || !challengeStatus.EndDate) {
-    return {
-      currentDay: 0,
-      totalDays: 0,
-      percentage: 0
-    };
-  }
-
-  const start = new Date(challengeStatus.StartDate);
-  const end = new Date(challengeStatus.EndDate);
-  const now = new Date();
-
-  // Calculate total days in challenge
-  const totalDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-  
-  // Calculate current day (minimum 1, maximum totalDays)
-  const currentDay = Math.min(
-    Math.max(1, Math.ceil((now - start) / (1000 * 60 * 60 * 24))),
-    totalDays
-  );
-
-  // Calculate percentage completed
-  const percentage = Math.min(
-    Math.max(0, ((now - start) / (end - start)) * 100),
-    100
-  );
-
-  return {
-    currentDay,
-    totalDays,
-    percentage: Math.round(percentage)
-  };
-};
 
   return (
-    <LinearGradient
-      colors={['#1A1A2E', '#0F0F1A']}
-      style={styles.container}
-      start={{ x: 0.5, y: 0 }}
-      end={{ x: 0.5, y: 1 }}
-    >
-      {/* Glow Effects */}
-      <View style={[styles.glow, styles.glow1]} />
-      <View style={[styles.glow, styles.glow2]} />
-
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Header */}
+    <View style={styles.container}>
+      <ScrollView style={styles.scrollView}>
+        {/* Header Section */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.logo}>FITSTREAK</Text>
-            <LinearGradient
-              colors={['#FF2E63', '#FFAC41']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.logoUnderline}
-            />
+            <Text style={styles.greeting}>Welcome, Sachin!</Text>
           </View>
-
-          <View style={styles.wallet}>
-            <Ionicons name="wallet-outline" size={16} color="#FFAC41" />
-            <Text style={styles.walletText}>₹2,400 locked</Text>
+          <View style={styles.profileAvatar}>
+            <Icon name="user" size={20} color="#ccc" />
           </View>
         </View>
 
-        <Animated.View
-          style={[styles.progressSection, { shadowOpacity: 0.7, shadowRadius: pulseShadow, shadowColor: '#FF2E63' }]}>
-          <View style={styles.progressTitle}>
-            <Text style={styles.progressTitleText}>YOUR 90-DAY CHALLENGE</Text>
-            <Text style={styles.progressTitleAmount}>₹5,000 at stake</Text>
+        {/* Health Metrics Section */}
+        <View style={styles.healthMetrics}>
+          {['steps', 'calories', 'bpm'].map((metric) => (
+            <TouchableOpacity
+              key={metric}
+              style={[
+                styles.metricCard,
+                activeMetric === metric && styles.metricCardActive,
+              ]}
+              onPress={() => handleTabChange(metric)}
+            >
+              <View style={styles.metricIcon}>
+                {renderMetricIcon(metric)}
+              </View>
+              <Text style={styles.metricValue}>
+                {metric === 'steps' ? '8,542' :
+                 metric === 'calories' ? '1,248' : '72'}
+              </Text>
+              <Text style={styles.metricLabel}>
+                {metric === 'steps' ? 'Steps' :
+                 metric === 'calories' ? 'Calories' : 'Avg BPM'}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Health Graph Container */}
+        <View style={styles.healthGraphContainer}>
+          <View style={styles.graphHeader}>
+            <Text style={styles.graphTitle}>Weekly Activity</Text>
+            <Text style={styles.graphTime}>Last 7 Days</Text>
           </View>
 
-          <View style={styles.progressBarContainer}>
-            <LinearGradient
-              colors={['#FF2E63', '#FFAC41']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={[styles.progressBar, { width: `${calculateProgress().percentage}%` }]}
+          <View style={styles.graphTabs}>
+            {['steps', 'calories', 'bpm'].map((tab) => (
+              <TouchableOpacity
+                key={tab}
+                style={[
+                  styles.graphTab,
+                  activeTab === tab && styles.graphTabActive,
+                ]}
+                onPress={() => handleTabChange(tab)}
+              >
+                <Text style={activeTab === tab ? styles.graphTabTextActive : styles.graphTabText}>
+                  {tab === 'steps' ? 'Steps' :
+                   tab === 'calories' ? 'Calories' : 'Heart Rate'}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <View style={styles.graphContent}>
+            <LineChart
+              data={{
+                labels: days,
+                datasets: [
+                  {
+                    data: chartData[activeTab],
+                    color: (opacity = 1) => {
+                      return activeTab === 'steps' ? '#00FF9D' :
+                             activeTab === 'calories' ? '#00A8FF' : '#FF6B6B';
+                    },
+                    strokeWidth: 2,
+                  },
+                ],
+              }}
+              width={Dimensions.get('window').width - 70}
+              height={200}
+              withVerticalLines={false}
+              withHorizontalLines={true}
+              chartConfig={{
+                backgroundColor: '#1E1E1E',
+                backgroundGradientFrom: '#1E1E1E',
+                backgroundGradientTo: '#1E1E1E',
+                decimalPlaces: 0,
+                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                style: {
+                  borderRadius: 16,
+                },
+                propsForDots: {
+                  r: '4',
+                  strokeWidth: '2',
+                  stroke: '#fff',
+                },
+              }}
+              bezier
+              style={{
+                marginVertical: 8,
+                borderRadius: 16,
+              }}
             />
           </View>
 
-          <View style={styles.progressDays}>
-            <Text style={styles.dayText}>Day {calculateProgress().currentDay}</Text>
-            <Text style={styles.dayText}>{calculateProgress().percentage}% completed</Text>
-            <Text style={styles.dayText}>Day {calculateProgress().totalDays}</Text>
+          <View style={styles.trendIndicator}>
+            {renderTrendIcon()}
+            <Text style={styles.trendText}>{trendData[activeTab].text}</Text>
+          </View>
+        </View>
+
+        {/* Featured Challenge Card */}
+        <View style={styles.featuredChallenge}>
+          <Text style={styles.featuredChallengeTitle}>ON: Run 5km in 2 Days</Text>
+          <Text style={styles.featuredChallengeSubtitle}>Get 50% off on Protein Powder</Text>
+
+          <View style={styles.progressContainer}>
+            <View style={styles.progressText}>
+              <Text style={styles.progressTextLeft}>200 participants</Text>
+              <Text style={styles.progressTextRight}>250 needed</Text>
+            </View>
+            <View style={styles.progressBar}>
+              <View style={[styles.progressFill, { width: '80%' }]} />
+            </View>
           </View>
 
-          <TouchableOpacity style={styles.emergencyButton} onPress={handleChallengeAction}>
-            {getButtonContent()}
+          <TouchableOpacity style={styles.joinBtn}>
+            <Text style={styles.joinBtnText}>Join Now</Text>
           </TouchableOpacity>
-        </Animated.View>
-
-        {/* Pressure Zone */}
-        <Text style={styles.sectionTitle}>Pressure Zone</Text>
-
-        <View style={styles.pressureCard}>
-          <Text style={styles.pressureTitle}>
-             <Animated.Text style={[styles.liveCounter, { opacity: blinkOpacity }]}>Complete Your Challenge</Animated.Text>
-          </Text>
-          <Text style={styles.pressureSub}>Avoid ₹500 weekend penalty fee - Scan before midnight!</Text>
-          <SkipChallenge/>
         </View>
 
-        <Animated.View
-          style={[
-            styles.pressureCard,
-            { transform: [{ translateY: floatingTranslation }] },
-          ]}
-        >
-          <Text style={styles.pressureTitle}>
-            LAST CHANCE: <Text style={styles.accentText}>3HRS 42MIN LEFT</Text>
-          </Text>
-          <Text style={styles.pressureSub}>Avoid ₹500 weekend penalty fee - Scan before midnight!</Text>
-          <SkipButton/>
-        </Animated.View>
+        {/* Ad Section */}
+        {showAd && (
+          <View style={styles.adSection}>
+            <View style={styles.adHeader}>
+              <Text style={styles.adLabel}>Sponsored</Text>
+              <TouchableOpacity onPress={() => setShowAd(false)}>
+                <Icon name="times" size={14} color="#777" />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.adContent}>
+              <Text style={styles.adTitle}>TRY OUR NEW PROTEIN BAR</Text>
+              <Text style={styles.adText}>30g protein, zero sugar, delicious taste</Text>
+              <TouchableOpacity style={styles.adBtn}>
+                <Text style={styles.adBtnText}>Learn More</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.adReward}>
+              <Icon name="coins" size={11} color="#00FF9D" />
+              <Text style={styles.adRewardText}>Earn 10 FitCoins by watching this ad</Text>
+            </View>
+          </View>
+        )}
+
+        {/* Active Challenges Section */}
+        <Text style={styles.sectionTitle}>Active Challenges</Text>
+        <FlatList
+          horizontal
+          data={challenges}
+          renderItem={({ item }) => (
+            <View style={[styles.challengeCard, {
+              backgroundColor: item.color[0],
+              backgroundGradientFrom: item.color[0],
+              backgroundGradientTo: item.color[1],
+            }]}>
+              <View>
+                <Text style={styles.challengeTitle}>{item.title}</Text>
+                <Text style={styles.challengeDescription}>{item.description}</Text>
+              </View>
+              <View style={styles.progressCircle}>
+                <Text style={styles.progressCircleText}>{item.progress}</Text>
+              </View>
+            </View>
+          )}
+          keyExtractor={item => item.id}
+          contentContainerStyle={styles.challengesScroll}
+          showsHorizontalScrollIndicator={false}
+        />
+
+        {/* Daily Workout Suggestion */}
+        <View style={styles.workoutSuggestion}>
+          <View style={styles.workoutHeader}>
+            <Text style={styles.workoutTitle}>Daily Workout</Text>
+            <View style={styles.workoutTime}>
+              <Text style={styles.workoutTimeText}>20 MIN</Text>
+            </View>
+          </View>
+
+          <FlatList
+            horizontal
+            data={exercises}
+            renderItem={({ item }) => (
+              <View style={styles.exercise}>
+                <View style={styles.exerciseIcon}>
+                  <Icon name={item.icon} size={16} color="#121212" />
+                </View>
+                <Text style={styles.exerciseName}>{item.name}</Text>
+                <Text style={styles.exerciseSets}>{item.sets}</Text>
+              </View>
+            )}
+            keyExtractor={item => item.id}
+            contentContainerStyle={styles.workoutExercises}
+            showsHorizontalScrollIndicator={false}
+          />
+
+          <TouchableOpacity style={styles.startWorkout}>
+            <Text style={styles.startWorkoutText}>Start Workout</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Blog Section */}
+        <Text style={styles.sectionTitle}>Fitness Articles</Text>
+        <FlatList
+          data={blogs}
+          renderItem={({ item }) => (
+            <View style={styles.blogCard}>
+              <View style={styles.blogImage}>
+                <Image source={{ uri: item.image }} style={styles.blogImage} />
+                <View style={styles.blogCategory}>
+                  <Text style={styles.blogCategoryText}>{item.category}</Text>
+                </View>
+              </View>
+              <View style={styles.blogContent}>
+                <Text style={styles.blogTitle}>{item.title}</Text>
+                <Text style={styles.blogExcerpt}>{item.excerpt}</Text>
+                <View style={styles.blogMeta}>
+                  <Text style={styles.blogMetaText}>{item.author}</Text>
+                  <Text style={styles.blogMetaText}>{item.readTime}</Text>
+                </View>
+                <Text style={styles.readMore}>Read More →</Text>
+              </View>
+            </View>
+          )}
+          keyExtractor={item => item.id}
+          contentContainerStyle={styles.blogSection}
+        />
       </ScrollView>
 
-      {/* Floating Action Button */}
-      <TouchableOpacity style={styles.fab}>
-        <LinearGradient
-          colors={['#FF2E63', '#FFAC41']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.fabGradient}
-        >
-          <Ionicons name="add" size={28} color="white" />
-        </LinearGradient>
-      </TouchableOpacity>
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Stats')}>
-          <Icon name="trophy" size={20} color="#BBBBCC" />
-          <Text style={styles.navLabel}>Stats</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Short-Challenges')}>
-          <Icon name="calendar-check" size={20} color="#BBBBCC" />
-          <Text style={[styles.navLabel]}>Challenges</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.navItem, styles.activeNavItem]}>
-          <Icon name="home" size={20} color="#FF2E63" />
-          <Text style={[styles.navLabel, styles.activeNavLabel]}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Shop')}>
-          <Icon name="calendar-check" size={20} color="#BBBBCC" />
-          <Text style={[styles.navLabel]}>Shop</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Profile')}>
-          <Icon name="user" size={20} color="#BBBBCC" />
-          <Text style={styles.navLabel}>Profile</Text>
-        </TouchableOpacity>
+      {/* Navigation Bar */}
+      <View style={styles.navBar}>
+        {['home', 'trophy', 'shopping-bag', 'dumbbell', 'user'].map((icon, index) => (
+          <TouchableOpacity key={icon} style={styles.navItem}>
+            <Icon
+              name={icon}
+              size={20}
+              color={index === 0 ? '#00A8FF' : '#aaa'}
+              style={styles.navIcon}
+            />
+            <Text style={[
+              styles.navText,
+              index === 0 && styles.navTextActive,
+            ]}>
+              {icon === 'home' ? 'Home' :
+               icon === 'trophy' ? 'Challenges' :
+               icon === 'shopping-bag' ? 'Store' :
+               icon === 'dumbbell' ? 'GYM' : 'Profile'}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
-    </LinearGradient>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#121212',
+    padding: 20,
+    paddingBottom: 70, // Space for nav bar
   },
-  scrollContainer: {
-    padding: 16,
-    paddingBottom: 80,
+  scrollView: {
+    flex: 1,
   },
-  glow: {
-    position: 'absolute',
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    zIndex: -1,
-    opacity: 0.3,
-  },
-  glow1: {
-    top: -50,
-    right: -50,
-    backgroundColor: '#FF2E63',
-  },
-  glow2: {
-    bottom: 100,
-    left: -50,
-    backgroundColor: '#FF2E63',
-  },
+  // Header Styles
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 24,
+    marginBottom: 25,
   },
-  logo: {
-    fontWeight: '800',
-    fontSize: 28,
-    letterSpacing: -1,
+  greeting: {
+    fontSize: 24,
+    fontWeight: '700',
     color: 'white',
   },
-  logoUnderline: {
-    height: 3,
-    width: '100%',
-    marginTop: 2,
+  profileAvatar: {
+    width: 45,
+    height: 45,
+    borderRadius: 22.5,
+    borderWidth: 2,
+    borderColor: '#00FF9D',
+    backgroundColor: '#333',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  wallet: {
+  // Health Metrics
+  healthMetrics: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 15,
+  },
+  metricCard: {
+    backgroundColor: '#1E1E1E',
+    borderRadius: 12,
+    padding: 12,
+    alignItems: 'center',
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  metricCardActive: {
+    backgroundColor: '#2A2A2A',
+    borderBottomWidth: 2,
+    borderBottomColor: '#00FF9D',
+  },
+  metricIcon: {
+    width: 25,
+    height: 25,
+    backgroundColor: '#333',
+    borderRadius: 12.5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  metricValue: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#00FF9D',
+    marginVertical: 3,
+  },
+  metricLabel: {
+    fontSize: 11,
+    color: 'rgba(255, 255, 255, 0.7)',
+  },
+  // Health Graph
+  healthGraphContainer: {
+    backgroundColor: '#1E1E1E',
+    borderRadius: 15,
+    padding: 15,
+    marginBottom: 25,
+  },
+  graphHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  graphTitle: {
+    fontSize: 16,
+    color: 'white',
+    fontWeight: '600',
+  },
+  graphTime: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.7)',
+  },
+  graphTabs: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
+    marginBottom: 15,
+  },
+  graphTab: {
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  graphTabActive: {
+    borderBottomColor: '#00A8FF',
+  },
+  graphTabText: {
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.7)',
+  },
+  graphTabTextActive: {
+    fontSize: 13,
+    color: '#00A8FF',
+  },
+  graphContent: {
+    height: 200,
+  },
+  trendIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 46, 99, 0.15)',
-    padding: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 46, 99, 0.3)',
+    marginTop: 10,
   },
-  walletText: {
-    color: '#FDFDFD',
-    fontSize: 14,
-    marginLeft: 6,
+  trendIcon: {
+    marginRight: 5,
   },
-  progressSection: {
-    backgroundColor: 'rgba(255,46,99,0.2)',
+  trendText: {
+    fontSize: 12,
+    color: 'white',
+  },
+  // Featured Challenge
+  featuredChallenge: {
+    backgroundColor: '#0066FF',
+    borderRadius: 15,
     padding: 20,
-    borderRadius: 16,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 46, 99, 0.2)',
-    shadowOffset: { width: 0, height: 0 },
+    marginBottom: 30,
+    shadowColor: '#00A8FF',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
     elevation: 5,
   },
-  progressTitle: {
+  featuredChallengeTitle: {
+    fontSize: 22,
+    color: 'white',
+    fontWeight: '700',
+    marginBottom: 5,
+  },
+  featuredChallengeSubtitle: {
+    color: '#00FF9D',
+    fontWeight: '500',
+    marginBottom: 20,
+  },
+  progressContainer: {
+    marginBottom: 20,
+  },
+  progressText: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: 5,
   },
-  progressTitleText: {
-    color: '#FDFDFD',
-    fontSize: 14,
-    opacity: 0.9,
+  progressTextLeft: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.8)',
   },
-  progressTitleAmount: {
-    color: '#FFAC41',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  progressBarContainer: {
-    height: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 5,
-    marginVertical: 16,
-    overflow: 'hidden',
+  progressTextRight: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.8)',
   },
   progressBar: {
-    height: '100%',
-    borderRadius: 5,
+    height: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 3,
+    overflow: 'hidden',
   },
-  progressDays: {
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#00FF9D',
+    borderRadius: 3,
+  },
+  joinBtn: {
+    backgroundColor: '#121212',
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 25,
+    alignItems: 'center',
+  },
+  joinBtnText: {
+    color: 'white',
+    fontWeight: '600',
+  },
+  // Ad Section
+  adSection: {
+    backgroundColor: '#1E1E1E',
+    borderRadius: 15,
+    padding: 15,
+    marginBottom: 25,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: '#444',
+  },
+  adHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  adLabel: {
+    fontSize: 12,
+    color: '#00A8FF',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  adContent: {
+    backgroundColor: '#333',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 10,
+  },
+  adTitle: {
+    fontSize: 16,
+    color: '#00FF9D',
+    marginBottom: 5,
+    fontWeight: '700',
+  },
+  adText: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.8)',
+    marginBottom: 10,
+  },
+  adBtn: {
+    backgroundColor: '#00A8FF',
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 15,
+    alignSelf: 'flex-start',
+  },
+  adBtnText: {
+    color: '#121212',
+    fontWeight: '600',
+    fontSize: 12,
+  },
+  adReward: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  adRewardText: {
+    fontSize: 11,
+    color: '#00FF9D',
+    marginLeft: 5,
+  },
+  // Section Title
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: 'white',
+    marginBottom: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  // Challenges
+  challengesScroll: {
+    paddingBottom: 10,
+    marginBottom: 20,
+  },
+  challengeCard: {
+    width: 150,
+    height: 180,
+    borderRadius: 15,
+    padding: 15,
+    marginRight: 15,
+    justifyContent: 'space-between',
+  },
+  challengeTitle: {
+    fontSize: 16,
+    color: 'white',
+    fontWeight: '600',
+    marginBottom: 5,
+  },
+  challengeDescription: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.9)',
+  },
+  progressCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 10,
+    alignSelf: 'center',
+  },
+  progressCircleText: {
+    fontWeight: '700',
+    fontSize: 14,
+    color: 'white',
+  },
+  // Workout Suggestion
+  workoutSuggestion: {
+    backgroundColor: '#1E1E1E',
+    borderRadius: 15,
+    padding: 20,
+    marginBottom: 30,
+  },
+  workoutHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  workoutTitle: {
+    fontSize: 18,
+    color: 'white',
+    fontWeight: '600',
+  },
+  workoutTime: {
+    backgroundColor: '#00A8FF',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 15,
+  },
+  workoutTimeText: {
+    color: '#121212',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  workoutExercises: {
+    paddingBottom: 10,
+  },
+  exercise: {
+    width: 120,
+    backgroundColor: '#333',
+    borderRadius: 10,
+    padding: 10,
+    marginRight: 10,
+    alignItems: 'center',
+  },
+  exerciseIcon: {
+    width: 40,
+    height: 40,
+    backgroundColor: '#00FF9D',
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  exerciseName: {
+    fontSize: 14,
+    color: 'white',
+    fontWeight: '600',
+    marginBottom: 3,
+    textAlign: 'center',
+  },
+  exerciseSets: {
+    fontSize: 11,
+    color: 'rgba(255, 255, 255, 0.7)',
+    textAlign: 'center',
+  },
+  startWorkout: {
+    backgroundColor: '#00A8FF',
+    padding: 12,
+    borderRadius: 10,
+    marginTop: 15,
+    alignItems: 'center',
+  },
+  startWorkoutText: {
+    color: '#121212',
+    fontWeight: '700',
+  },
+  // Blog Section
+  blogSection: {
+    paddingBottom: 15,
+  },
+  blogCard: {
+    backgroundColor: '#1E1E1E',
+    borderRadius: 15,
+    overflow: 'hidden',
+    marginBottom: 15,
+  },
+  blogImage: {
+    height: 120,
+    backgroundColor: '#333',
+  },
+  blogCategory: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    backgroundColor: '#00A8FF',
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 15,
+  },
+  blogCategoryText: {
+    color: '#121212',
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  blogContent: {
+    padding: 15,
+  },
+  blogTitle: {
+    fontSize: 16,
+    color: 'white',
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  blogExcerpt: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.8)',
+    marginBottom: 12,
+    lineHeight: 18,
+  },
+  blogMeta: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  dayText: {
-    color: '#FDFDFD',
+  blogMetaText: {
+    fontSize: 11,
+    color: 'rgba(255, 255, 255, 0.6)',
+  },
+  readMore: {
+    color: '#00A8FF',
     fontSize: 12,
-    opacity: 0.8,
-  },
-  emergencyButton: {
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 14,
-    borderRadius: 10,
-    marginTop: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 46, 99, 0.3)',
-  },
-  emergencyButtonText: {
-    color: '#FF2E63',
-    fontWeight: 'bold',
-    fontSize: 14,
-    marginLeft: 8,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    marginVertical: 16,
-    fontWeight: '700',
-    color: '#FDFDFD',
-  },
-  pressureCard: {
-    backgroundColor: 'rgba(30,30,46,0.7)',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 172, 65, 0.2)',
-    overflow: 'hidden',
-  },
-  pressureTitle: {
-    fontSize: 17,
-    marginBottom: 8,
     fontWeight: '600',
-    color: '#FDFDFD',
+    marginTop: 10,
   },
-  pressureSub: {
-    fontSize: 14,
-    opacity: 0.7,
-    marginBottom: 16,
-    color: '#FDFDFD',
-  },
-  liveCounter: {
-    color: '#FFAC41',
-    fontWeight: '700',
-  },
-  accentText: {
-    color: '#FFAC41',
-  },
-  penaltyButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: '#FF2E63',
-    padding: 14,
-    borderRadius: 10,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 12,
-  },
-  penaltyButtonText: {
-    color: '#FF2E63',
-    fontWeight: 'bold',
-    marginLeft: 8,
-  },
-  fab: {
-    position: 'absolute',
-    bottom: 80,
-    right: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    overflow: 'hidden',
-  },
-  fabGradient: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  bottomNav: {
+  // Navigation Bar
+  navBar: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(15, 15, 26, 0.9)',
-    borderTopWidth: 1,
-    borderTopColor: '#333344',
-    paddingVertical: 12,
+    backgroundColor: '#121212',
     flexDirection: 'row',
-    justifyContent: 'space-evenly',
+    justifyContent: 'space-around',
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#333',
   },
   navItem: {
     alignItems: 'center',
-    padding: 8,
-    borderRadius: 8,
   },
-  activeNavItem: {
-    backgroundColor: 'rgba(255, 46, 99, 0.15)',
+  navIcon: {
+    marginBottom: 5,
   },
-  navLabel: {
+  navText: {
     fontSize: 12,
-    color: '#BBBBCC',
-    fontWeight: '500',
-    marginTop: 4,
+    color: '#aaa',
   },
-  activeNavLabel: {
-    color: 'white',
+  navTextActive: {
+    color: '#00A8FF',
   },
 });
 
-export default FitStreakApp;
+export default FitQuestApp;

@@ -50,6 +50,7 @@ dependencies {
     implementation("com.facebook.react:react-android")
     implementation platform('com.google.firebase:firebase-bom:33.13.0')
     implementation 'com.google.firebase:firebase-analytics'
+    implementation project(':react-native-svg')
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")

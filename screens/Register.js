@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Alert, Text, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
 
 const RegisterScreen = ({ navigation }) => {
   const [form, setForm] = useState({
@@ -10,6 +9,7 @@ const RegisterScreen = ({ navigation }) => {
     email: '',
     Mobile: '',
     password: '',
+    referredBy: ''
   });
 
   const handleChange = (key, value) => {
@@ -18,11 +18,17 @@ const RegisterScreen = ({ navigation }) => {
 
   const handleSubmit = async () => {
     try {
+      // Basic validation
+      if (!form.username || !form.email || !form.Mobile || !form.password) {
+        Alert.alert('Error', 'Please fill in all required fields');
+        return;
+      }
+
       // Send the POST request to register the user
-      const response = await fetch('http://192.168.244.177:3000/Register', {
+      const response = await fetch('http://192.168.105.177:3000/Register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),  // Assuming form is your form data
+        body: JSON.stringify(form),
       });
 
       const data = await response.json();
@@ -40,32 +46,67 @@ const RegisterScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.title}>Create Account</Text>
+      
+      <Text style={styles.label}>Username*</Text>
       <TextInput
-        placeholder="Username"
+        placeholder="Enter your username"
+        placeholderTextColor="#999"
         style={styles.input}
         value={form.username}
         onChangeText={(text) => handleChange('username', text)}
       />
+      
+      <Text style={styles.label}>Email*</Text>
       <TextInput
-        placeholder="Email"
+        placeholder="Enter your email"
+        placeholderTextColor="#999"
         style={styles.input}
         value={form.email}
         onChangeText={(text) => handleChange('email', text)}
+        keyboardType="email-address"
+        autoCapitalize="none"
       />
+      
+      <Text style={styles.label}>Mobile Number*</Text>
       <TextInput
-        placeholder="Mobile"
+        placeholder="Enter your mobile number"
+        placeholderTextColor="#999"
         style={styles.input}
         value={form.Mobile}
         onChangeText={(text) => handleChange('Mobile', text)}
+        keyboardType="phone-pad"
       />
+      
+      <Text style={styles.label}>Password*</Text>
       <TextInput
-        placeholder="Password"
+        placeholder="Create a password"
+        placeholderTextColor="#999"
         style={styles.input}
         secureTextEntry
         value={form.password}
         onChangeText={(text) => handleChange('password', text)}
       />
-      <Button title="Submit" onPress={handleSubmit} />
+      
+      <Text style={styles.label}>Referred By (Optional)</Text>
+      <TextInput
+        placeholder="Referral code if any"
+        placeholderTextColor="#999"
+        style={styles.input}
+        value={form.referredBy}
+        onChangeText={(text) => handleChange('referredBy', text)}
+      />
+      
+      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+        <Text style={styles.buttonText}>Sign Up</Text>
+      </TouchableOpacity>
+      
+      <View style={styles.loginContainer}>
+        <Text style={styles.loginText}>Already have an account? </Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+          <Text style={styles.loginLink}>Login</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -74,16 +115,56 @@ export default RegisterScreen;
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    marginTop: 50,
-    backgroundColor: 'black'
+    flex: 1,
+    padding: 30,
+    backgroundColor: '#121212',
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 30,
+    textAlign: 'center',
+  },
+  label: {
+    color: '#fff',
+    marginBottom: 8,
+    fontSize: 14,
+    fontWeight: '500',
   },
   input: {
+    backgroundColor: '#1E1E1E',
     borderWidth: 1,
-    borderColor: '#aaa',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 15,
-    color: 'white'
+    borderColor: '#333',
+    borderRadius: 8,
+    padding: 14,
+    marginBottom: 20,
+    color: '#fff',
+    fontSize: 16,
+  },
+  button: {
+    backgroundColor: '#4A80F0',
+    borderRadius: 8,
+    padding: 16,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  loginContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+  loginText: {
+    color: '#aaa',
+  },
+  loginLink: {
+    color: '#4A80F0',
+    fontWeight: 'bold',
   },
 });
